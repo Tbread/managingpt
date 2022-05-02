@@ -4,6 +4,7 @@ import com.healthcare.managingpt.dto.request.UserLoginRequestDto
 import com.healthcare.managingpt.dto.request.UserRegisterRequestDto
 import com.healthcare.managingpt.dto.response.UserLoginResponseDto
 import com.healthcare.managingpt.dto.response.UserRegisterResponseDto
+import com.healthcare.managingpt.jwt.JwtTokenProvider
 import com.healthcare.managingpt.model.User
 import com.healthcare.managingpt.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,16 +15,20 @@ import java.util.Objects
 import java.util.Optional
 
 @Service
-class UserService(private var passwordEncoder: BCryptPasswordEncoder,private var userRepository: UserRepository) {
+class UserService(
+    private var passwordEncoder: BCryptPasswordEncoder,
+    private var userRepository: UserRepository,
+    private var jwtTokenProvider: JwtTokenProvider
+) {
 
     @Transactional
-    fun registerUser(req: UserRegisterRequestDto):UserRegisterResponseDto{
-        val username:String = req.username
-        val password:String = req.password
-        var res:UserRegisterResponseDto = UserRegisterResponseDto()
-        var user:User = User()
-        var nullableUser:User? = userRepository.findByUsername(username)
-        if (Objects.isNull(nullableUser)){
+    fun registerUser(req: UserRegisterRequestDto): UserRegisterResponseDto {
+        val username: String = req.username
+        val password: String = req.password
+        var res: UserRegisterResponseDto = UserRegisterResponseDto()
+        var user: User = User()
+        var nullableUser: User? = userRepository.findByUsername(username)
+        if (Objects.isNull(nullableUser)) {
             user.username = username
             user.password = passwordEncoder.encode(password)
             user.userType = User.UserType.DEFAULT
@@ -38,15 +43,15 @@ class UserService(private var passwordEncoder: BCryptPasswordEncoder,private var
         return res
     }
 
-    fun login(req:UserLoginRequestDto):UserLoginResponseDto{
-        val username:String = req.username
-        val rawPassword:String = req.password
-        var res:UserLoginResponseDto = UserLoginResponseDto()
-        var user:User? = userRepository.findByUsername(username)
-        var password:String? = if(Objects.nonNull(user)) user?.password else null
-        if (Objects.nonNull(user) && passwordEncoder.matches(rawPassword,password)){
+    fun login(req: UserLoginRequestDto): UserLoginResponseDto {
+        val username: String = req.username
+        val rawPassword: String = req.password
+        var res: UserLoginResponseDto = UserLoginResponseDto()
+        var user: User? = userRepository.findByUsername(username)
+        var password: String? = if (Objects.nonNull(user)) user?.password else null
+        if (Objects.nonNull(user) && passwordEncoder.matches(rawPassword, password)) {
             res.msg = "성공적으로 로그인하였습니다."
-//            res.jwt = TODO()
+            res.jwt = jwtTokenProvider.createToken(username, user!!.id)
             res.success = true
             res.username = username
 
