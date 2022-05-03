@@ -9,16 +9,14 @@ import com.healthcare.managingpt.dto.response.UserRegisterResponseDto
 import com.healthcare.managingpt.jwt.JwtTokenProvider
 import com.healthcare.managingpt.model.User
 import com.healthcare.managingpt.repository.UserRepository
-import net.bytebuddy.utility.RandomString
+import com.healthcare.managingpt.tools.RandomizedString
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.security.SecureRandom
 import java.util.Objects
-import javax.mail.internet.MimeMessage
 import javax.servlet.http.HttpServletResponse
 
 @Service
@@ -84,7 +82,7 @@ class UserService(
         var res:UserPasswordResetResponseDto = UserPasswordResetResponseDto()
         var user: User? = userRepository.findByUsernameAndEmail(req.username,req.email)
         if (Objects.nonNull(user)){
-            var randomizeKey:String = Math.random().toString().substring(3)
+            var randomizeKey:String = RandomizedString().randomAlphabetNumber(12)
             var email:SimpleMailMessage = SimpleMailMessage()
             email.setSubject("임시 비밀번호 발송")
             email.setText("임시비밀번호:"+randomizeKey)
