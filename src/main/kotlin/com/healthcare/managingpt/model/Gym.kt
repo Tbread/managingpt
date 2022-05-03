@@ -25,6 +25,9 @@ class Gym :TimeStamped(){
     @Column(nullable = false)
     var address:String = ""
 
+    @Column(nullable = false)
+    var registrationNum:String = ""
+
     @ManyToOne
     @JoinColumn
     var owner:User? = null

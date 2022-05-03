@@ -3,7 +3,7 @@ package com.healthcare.managingpt.model
 import javax.persistence.*
 
 @Entity
-class CreateGymRequest:TimeStamped(){
+class GymCreateRequest:TimeStamped(){
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +17,9 @@ class CreateGymRequest:TimeStamped(){
 
     @Column(nullable = false)
     var address:String = ""
+
+    @Column(nullable = false)
+    var registrationNum:String = ""
 
     @ManyToOne
     @JoinColumn
