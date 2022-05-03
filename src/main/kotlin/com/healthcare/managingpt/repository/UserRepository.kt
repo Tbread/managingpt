@@ -7,4 +7,5 @@ import java.util.Optional
 interface UserRepository : JpaRepository<User, Long> {
     fun findByUsername(username: String): User?
     fun countByUsername(username: String): Long
+    fun countByEmail(email: String): Long
 }

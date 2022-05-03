@@ -31,10 +31,11 @@ class UserService(
         val password: String = req.password
         var res: UserRegisterResponseDto = UserRegisterResponseDto()
         var user: User = User()
-        if (userRepository.countByUsername(username).equals(0L)) {
+        if (userRepository.countByUsername(username) == 0L && userRepository.countByEmail(req.email) == 0L) {
             user.username = username
             user.password = passwordEncoder.encode(password)
             user.userType = User.UserType.DEFAULT
+            user.email = req.email
             if (req.code == adminCode) {
                 res.userType = "ADMIN"
                 user.userType = User.UserType.ADMIN
@@ -46,7 +47,7 @@ class UserService(
             res.success = true
             res.userId = user.id
         } else {
-            res.msg = "중복된 아이디입니다."
+            res.msg = "중복된 아이디 또는 이메일입니다."
             res.success = false
         }
         return res

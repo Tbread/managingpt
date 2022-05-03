@@ -22,6 +22,9 @@ class User : TimeStamped() {
     var id: Long = 0
 
     @Column(nullable = false)
+    var email: String = ""
+
+    @Column(nullable = false)
     var username: String = ""
 
     @Column(nullable = false)
