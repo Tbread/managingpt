@@ -42,7 +42,7 @@ class JwtTokenProvider(private var userDetailsService: UserDetailsService) {
     }
 
     fun getUsername(token:String):String{
-        return Jwts.parser().setSigningKey(secretJwtKey).parseClaimsJwt(token).body.subject
+        return Jwts.parser().setSigningKey(secretJwtKey).parseClaimsJws(token).body.subject
     }
 
     fun getAuthentication(token: String):Authentication{
