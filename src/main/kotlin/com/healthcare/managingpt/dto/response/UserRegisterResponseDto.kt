@@ -4,4 +4,5 @@ class UserRegisterResponseDto {
     var success:Boolean = true
     var msg:String? = null
     var userId:Long? = null
+    var userType:String? = null
 }

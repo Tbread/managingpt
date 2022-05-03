@@ -8,6 +8,7 @@ import com.healthcare.managingpt.jwt.JwtTokenProvider
 import com.healthcare.managingpt.model.User
 import com.healthcare.managingpt.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,6 +22,9 @@ class UserService(
     private var jwtTokenProvider: JwtTokenProvider
 ) {
 
+    @Value("\${etc.adminCode}")
+    lateinit var adminCode: String
+
     @Transactional
     fun registerUser(req: UserRegisterRequestDto): UserRegisterResponseDto {
         val username: String = req.username
@@ -32,6 +36,12 @@ class UserService(
             user.username = username
             user.password = passwordEncoder.encode(password)
             user.userType = User.UserType.DEFAULT
+            if (req.code == adminCode) {
+                res.userType = "ADMIN"
+                user.userType = User.UserType.ADMIN
+            } else {
+                res.userType = "DEFAULT"
+            }
             userRepository.save(user)
             res.msg = "성공적으로 생성되었습니다."
             res.success = true

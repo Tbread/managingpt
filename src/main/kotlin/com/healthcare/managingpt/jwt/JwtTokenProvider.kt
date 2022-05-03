@@ -50,6 +50,7 @@ class JwtTokenProvider(private var userDetailsService: UserDetailsService) {
         return UsernamePasswordAuthenticationToken(userDetails,"",userDetails.authorities)
     }
 
+    // 항상 헤더가 들어오는게 아니니 nullable
     fun resolveToken(req:HttpServletRequest):String?{
         return req.getHeader("Authorization")
     }
