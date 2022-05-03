@@ -1,8 +1,10 @@
 package com.healthcare.managingpt.controller
 
 import com.healthcare.managingpt.dto.request.UserLoginRequestDto
+import com.healthcare.managingpt.dto.request.UserPasswordResetRequestDto
 import com.healthcare.managingpt.dto.request.UserRegisterRequestDto
 import com.healthcare.managingpt.dto.response.UserLoginResponseDto
+import com.healthcare.managingpt.dto.response.UserPasswordResetResponseDto
 import com.healthcare.managingpt.dto.response.UserRegisterResponseDto
 import com.healthcare.managingpt.service.UserService
 import org.springframework.web.bind.annotation.*
@@ -19,5 +21,10 @@ class UserController(private var userService: UserService) {
     @PostMapping("/login")
     fun login(@RequestBody req:UserLoginRequestDto):UserLoginResponseDto{
         return userService.login(req)
+    }
+
+    @PostMapping("/pass-reset")
+    fun passwordReset(@RequestBody req: UserPasswordResetRequestDto):UserPasswordResetResponseDto{
+        return userService.passwordResetRequest(req)
     }
 }

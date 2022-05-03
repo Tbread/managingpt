@@ -33,4 +33,8 @@ class User : TimeStamped() {
     @Column(nullable = false)
     var userType: UserType = UserType.DEFAULT
 
+    fun passwordReset(password: String) {
+        this.password = password
+    }
+
 }

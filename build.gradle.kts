@@ -34,6 +34,7 @@ dependencies {
 	implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity5")
 	implementation("org.springframework.boot:spring-boot-configuration-processor:2.6.7")
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
+	implementation("org.springframework.boot:spring-boot-starter-mail:2.6.7")
 	runtimeOnly ("mysql:mysql-connector-java")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")

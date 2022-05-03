@@ -1,25 +1,32 @@
 package com.healthcare.managingpt.service
 
 import com.healthcare.managingpt.dto.request.UserLoginRequestDto
+import com.healthcare.managingpt.dto.request.UserPasswordResetRequestDto
 import com.healthcare.managingpt.dto.request.UserRegisterRequestDto
 import com.healthcare.managingpt.dto.response.UserLoginResponseDto
+import com.healthcare.managingpt.dto.response.UserPasswordResetResponseDto
 import com.healthcare.managingpt.dto.response.UserRegisterResponseDto
 import com.healthcare.managingpt.jwt.JwtTokenProvider
 import com.healthcare.managingpt.model.User
 import com.healthcare.managingpt.repository.UserRepository
-import org.springframework.beans.factory.annotation.Autowired
+import net.bytebuddy.utility.RandomString
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.security.SecureRandom
 import java.util.Objects
-import java.util.Optional
+import javax.mail.internet.MimeMessage
+import javax.servlet.http.HttpServletResponse
 
 @Service
 class UserService(
     private var passwordEncoder: BCryptPasswordEncoder,
     private var userRepository: UserRepository,
-    private var jwtTokenProvider: JwtTokenProvider
+    private var jwtTokenProvider: JwtTokenProvider,
+    private var javaMailSender: JavaMailSender
 ) {
 
     @Value("\${etc.adminCode}")
@@ -68,6 +75,27 @@ class UserService(
         } else {
             res.msg = "올바르지않은 아이디 또는 패스워드입니다."
             res.success = false
+        }
+        return res
+    }
+
+    @Transactional
+    fun passwordResetRequest(req: UserPasswordResetRequestDto):UserPasswordResetResponseDto{
+        var res:UserPasswordResetResponseDto = UserPasswordResetResponseDto()
+        var user: User? = userRepository.findByUsernameAndEmail(req.username,req.email)
+        if (Objects.nonNull(user)){
+            var randomizeKey:String = Math.random().toString().substring(3)
+            var email:SimpleMailMessage = SimpleMailMessage()
+            email.setSubject("임시 비밀번호 발송")
+            email.setText("임시비밀번호:"+randomizeKey)
+            email.setTo(user!!.email)
+            javaMailSender.send(email)
+            user.passwordReset(passwordEncoder.encode(randomizeKey))
+            res.msg = "성공적으로 메일을 발송하였습니다."
+            res.code = HttpServletResponse.SC_OK
+        } else {
+            res.msg = "존재하지 않는 계정 정보입니다."
+            res.code = HttpServletResponse.SC_BAD_REQUEST
         }
         return res
     }
