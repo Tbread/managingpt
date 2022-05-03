@@ -31,8 +31,7 @@ class UserService(
         val password: String = req.password
         var res: UserRegisterResponseDto = UserRegisterResponseDto()
         var user: User = User()
-        var nullableUser: User? = userRepository.findByUsername(username)
-        if (Objects.isNull(nullableUser)) {
+        if (userRepository.countByUsername(username).equals(0L)) {
             user.username = username
             user.password = passwordEncoder.encode(password)
             user.userType = User.UserType.DEFAULT
