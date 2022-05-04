@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface GymCreateRequestRepository:JpaRepository<GymCreateRequest,Long> {
     fun existsByRegistrationNum(registrationNum:String):Boolean
+    fun findByApplicant(applicant:User):List<GymCreateRequest>
 }
