@@ -7,7 +7,6 @@ import com.healthcare.managingpt.model.User
 import com.healthcare.managingpt.repository.GymCreateRequestRepository
 import com.healthcare.managingpt.repository.GymRepository
 import com.healthcare.managingpt.repository.UserRepository
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.servlet.http.HttpServletResponse
@@ -23,7 +22,7 @@ class GymService(
     fun createGym(req:GymCreateRequestDto,userDetails: UserDetailsImpl):GymCreateResponseDto{
         var res = GymCreateResponseDto()
         var regNum:String = req.registrationNum
-        if (gymCreateRequestRepository.countByRegistrationNum(regNum) == 0 && gymRepository.countByRegistrationNum(regNum) == 0){
+        if (gymCreateRequestRepository.existsByRegistrationNum(regNum)&& gymRepository.existsByRegistrationNum(regNum)){
             var user:User = userRepository.findByUsername(userDetails.username)!!
             if (user.userType != User.UserType.ADMIN){
                 var gymCreateRequest = GymCreateRequest()
