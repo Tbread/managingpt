@@ -1,8 +1,10 @@
 package com.healthcare.managingpt.service
 
 import com.healthcare.managingpt.dto.request.GymCreateRequestDto
+import com.healthcare.managingpt.dto.response.GymCreatePermitResponseDto
 import com.healthcare.managingpt.dto.response.GymCreateRequestsViewResponseDto
 import com.healthcare.managingpt.dto.response.GymCreateResponseDto
+import com.healthcare.managingpt.model.Gym
 import com.healthcare.managingpt.model.GymCreateRequest
 import com.healthcare.managingpt.model.SimpleCreateRequest
 import com.healthcare.managingpt.model.User
@@ -11,6 +13,8 @@ import com.healthcare.managingpt.repository.GymRepository
 import com.healthcare.managingpt.repository.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.Objects
+import java.util.Optional
 import javax.servlet.http.HttpServletResponse
 
 @Service
@@ -21,12 +25,12 @@ class GymService(
 ) {
 
     @Transactional
-    fun createGym(req:GymCreateRequestDto,userDetails: UserDetailsImpl):GymCreateResponseDto{
+    fun createGym(req: GymCreateRequestDto, userDetails: UserDetailsImpl): GymCreateResponseDto {
         var res = GymCreateResponseDto()
-        var regNum:String = req.registrationNum
-        if (gymCreateRequestRepository.existsByRegistrationNum(regNum)&& gymRepository.existsByRegistrationNum(regNum)){
-            var user:User = userRepository.findByUsername(userDetails.username)!!
-            if (user.userType != User.UserType.ADMIN){
+        var regNum: String = req.registrationNum
+        if (gymCreateRequestRepository.existsByRegistrationNum(regNum) && gymRepository.existsByRegistrationNum(regNum)) {
+            var user: User = userRepository.findByUsername(userDetails.username)!!
+            if (user.userType != User.UserType.ADMIN) {
                 var gymCreateRequest = GymCreateRequest()
                 gymCreateRequest.address = req.address
                 gymCreateRequest.applicant = user
@@ -50,26 +54,47 @@ class GymService(
         return res
     }
 
-    fun viewCreateRequests(userDetails: UserDetailsImpl):GymCreateRequestsViewResponseDto{
-        var user:User = userDetails.getUser()
+    fun viewCreateRequests(userDetails: UserDetailsImpl): GymCreateRequestsViewResponseDto {
+        var user: User = userDetails.getUser()
         var res: GymCreateRequestsViewResponseDto = GymCreateRequestsViewResponseDto()
         if (user.userType == User.UserType.ADMIN) {
             var requestList: List<GymCreateRequest> = gymCreateRequestRepository.findByApplicant(user)
             var simpleCreateRequests = arrayListOf<SimpleCreateRequest>()
-            for (request:GymCreateRequest in requestList){
-                var simpleCreateRequest:SimpleCreateRequest = SimpleCreateRequest()
-                simpleCreateRequest.requestId=request.id
-                simpleCreateRequest.name=request.name
-                simpleCreateRequest.tel=request.tel
-                simpleCreateRequest.address=request.address
-                simpleCreateRequest.registrationNum=request.registrationNum
-                simpleCreateRequest.userId= request.applicant!!.id
-                simpleCreateRequest.username= request.applicant!!.username
+            for (request: GymCreateRequest in requestList) {
+                var simpleCreateRequest: SimpleCreateRequest = SimpleCreateRequest(request)
                 simpleCreateRequests.add(simpleCreateRequest)
             }
             res.simpleCreateRequests = simpleCreateRequests
             res.code = HttpServletResponse.SC_OK
             res.msg = "성공적으로 불러왔습니다."
+        } else {
+            res.code = HttpServletResponse.SC_BAD_REQUEST
+            res.msg = "권한이 부족합니다."
+        }
+        return res
+    }
+
+    @Transactional
+    fun permitRequest(id: Long, userDetails: UserDetailsImpl): GymCreatePermitResponseDto {
+        var res: GymCreatePermitResponseDto = GymCreatePermitResponseDto()
+        if (userDetails.getUser().userType == User.UserType.ADMIN) {
+            val gymCreateRequest: Optional<GymCreateRequest> = gymCreateRequestRepository.findById(id)
+            if (Objects.nonNull(gymCreateRequest)) {
+                var gym: Gym = Gym()
+                gym.address = gymCreateRequest.get().address
+                gym.tel = gymCreateRequest.get().tel
+                gym.name = gymCreateRequest.get().name
+                gym.registrationNum = gymCreateRequest.get().registrationNum
+                gym.owner = gymCreateRequest.get().applicant
+                gymRepository.save(gym)
+                gymCreateRequestRepository.delete(gymCreateRequest.get())
+                res.code=HttpServletResponse.SC_OK
+                res.msg="성공적으로 승안하였습니다."
+                res.request = SimpleCreateRequest(gymCreateRequest!!.get())
+            } else {
+                res.code = HttpServletResponse.SC_BAD_REQUEST
+                res.msg = "존재하지않는 요청ID입니다"
+            }
         } else {
             res.code = HttpServletResponse.SC_BAD_REQUEST
             res.msg = "권한이 부족합니다."
