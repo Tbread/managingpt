@@ -17,5 +17,6 @@ class SimpleCreateRequest {
         this.name = req.name
         this.registrationNum = req.registrationNum
         this.username = req.applicant!!.username
+        this.userId = req.applicant!!.id
     }
 }
