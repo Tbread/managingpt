@@ -12,9 +12,9 @@ import javax.persistence.Id
 @NoArgsConstructor
 class User : TimeStamped() {
     enum class UserType {
-        ADMIN,
+        DEFAULT,
         MANAGER,
-        DEFAULT
+        ADMIN
     }
 
     @Id
