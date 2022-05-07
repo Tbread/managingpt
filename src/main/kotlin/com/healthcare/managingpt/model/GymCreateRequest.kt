@@ -25,3 +25,4 @@ class GymCreateRequest:TimeStamped(){
     @JoinColumn
     var applicant:User? = null
 }
+// TODO: 2022-05-07 객체에 값을 추가해서 대기/반려/수락 여부를 알수있게 해야할것같음

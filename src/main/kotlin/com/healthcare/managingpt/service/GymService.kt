@@ -1,6 +1,7 @@
 package com.healthcare.managingpt.service
 
 import com.healthcare.managingpt.dto.request.GymCreateRequestDto
+import com.healthcare.managingpt.dto.response.GymCreateDenyResponseDto
 import com.healthcare.managingpt.dto.response.GymCreatePermitResponseDto
 import com.healthcare.managingpt.dto.response.GymCreateRequestsViewResponseDto
 import com.healthcare.managingpt.dto.response.GymCreateResponseDto
@@ -89,13 +90,35 @@ class GymService(
                 gymRepository.save(gym)
                 gymCreateRequestRepository.delete(gymCreateRequest.get())
                 res.code=HttpServletResponse.SC_OK
-                res.msg="성공적으로 승안하였습니다."
+                res.msg="성공적으로 승인하였습니다."
                 res.request = SimpleCreateRequest(gymCreateRequest!!.get())
             } else {
                 res.code = HttpServletResponse.SC_BAD_REQUEST
                 res.msg = "존재하지않는 요청ID입니다"
             }
         } else {
+            res.code = HttpServletResponse.SC_BAD_REQUEST
+            res.msg = "권한이 부족합니다."
+        }
+        return res
+    }
+
+    // TODO: 2022-05-07 로직에 유저가 요청반려당했음을 알려주는걸 추가해야할거같음 
+    @Transactional
+    fun denyRequest(id:Long,userDetails: UserDetailsImpl):GymCreateDenyResponseDto{
+        var res = GymCreateDenyResponseDto()
+        if (userDetails.getUser().userType == User.UserType.ADMIN){
+            val request = gymCreateRequestRepository.findById(id)
+            if (Objects.nonNull(request)){
+                gymCreateRequestRepository.delete(request.get())
+                res.code = HttpServletResponse.SC_OK
+                res.msg = "성공적으로 거절하였습니다."
+                res.request = SimpleCreateRequest(request.get())
+            } else {
+                res.code=HttpServletResponse.SC_BAD_REQUEST
+                res.msg = "존재하지않는 요청 ID입니다."
+            }
+        } else{
             res.code = HttpServletResponse.SC_BAD_REQUEST
             res.msg = "권한이 부족합니다."
         }
