@@ -5,6 +5,12 @@ import javax.persistence.*
 @Entity
 class GymCreateRequest:TimeStamped(){
 
+    enum class Status{
+        AWAIT,
+        ACCEPTED,
+        DENIED
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id:Long = 0
@@ -24,5 +30,11 @@ class GymCreateRequest:TimeStamped(){
     @ManyToOne
     @JoinColumn
     var applicant:User? = null
+
+    @Column(nullable = false)
+    var status = GymCreateRequest.Status.AWAIT
+
+    fun updateStatus(status: Status){
+        this.status = status
+    }
 }
-// TODO: 2022-05-07 객체에 값을 추가해서 대기/반려/수락 여부를 알수있게 해야할것같음

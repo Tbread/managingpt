@@ -8,4 +8,6 @@ import java.util.*
 interface GymCreateRequestRepository:JpaRepository<GymCreateRequest,Long> {
     fun existsByRegistrationNum(registrationNum:String):Boolean
     fun findByApplicant(applicant:User):List<GymCreateRequest>
+
+    fun findByStatus(status:GymCreateRequest.Status):List<GymCreateRequest>
 }

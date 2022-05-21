@@ -59,7 +59,8 @@ class GymService(
         var user: User = userDetails.getUser()
         var res: GymCreateRequestsViewResponseDto = GymCreateRequestsViewResponseDto()
         if (user.userType == User.UserType.ADMIN) {
-            var requestList: List<GymCreateRequest> = gymCreateRequestRepository.findByApplicant(user)
+            var requestList: List<GymCreateRequest> =
+                gymCreateRequestRepository.findByStatus(GymCreateRequest.Status.AWAIT)
             var simpleCreateRequests = arrayListOf<SimpleCreateRequest>()
             for (request: GymCreateRequest in requestList) {
                 var simpleCreateRequest: SimpleCreateRequest = SimpleCreateRequest(request)
@@ -81,17 +82,22 @@ class GymService(
         if (userDetails.getUser().userType == User.UserType.ADMIN) {
             val gymCreateRequest: Optional<GymCreateRequest> = gymCreateRequestRepository.findById(id)
             if (Objects.nonNull(gymCreateRequest)) {
-                var gym: Gym = Gym()
-                gym.address = gymCreateRequest.get().address
-                gym.tel = gymCreateRequest.get().tel
-                gym.name = gymCreateRequest.get().name
-                gym.registrationNum = gymCreateRequest.get().registrationNum
-                gym.owner = gymCreateRequest.get().applicant
-                gymRepository.save(gym)
-                gymCreateRequestRepository.delete(gymCreateRequest.get())
-                res.code=HttpServletResponse.SC_OK
-                res.msg="성공적으로 승인하였습니다."
-                res.request = SimpleCreateRequest(gymCreateRequest!!.get())
+                if (gymCreateRequest.get().status == GymCreateRequest.Status.AWAIT) {
+                    var gym: Gym = Gym()
+                    gym.address = gymCreateRequest.get().address
+                    gym.tel = gymCreateRequest.get().tel
+                    gym.name = gymCreateRequest.get().name
+                    gym.registrationNum = gymCreateRequest.get().registrationNum
+                    gym.owner = gymCreateRequest.get().applicant
+                    gymRepository.save(gym)
+                    gymCreateRequest.get().updateStatus(GymCreateRequest.Status.ACCEPTED)
+                    res.code = HttpServletResponse.SC_OK
+                    res.msg = "성공적으로 승인하였습니다."
+                    res.request = SimpleCreateRequest(gymCreateRequest!!.get())
+                } else {
+                    res.code = HttpServletResponse.SC_BAD_REQUEST
+                    res.msg = "이미 수락 또는 거절된 요청입니다."
+                }
             } else {
                 res.code = HttpServletResponse.SC_BAD_REQUEST
                 res.msg = "존재하지않는 요청ID입니다"
@@ -103,22 +109,26 @@ class GymService(
         return res
     }
 
-    // TODO: 2022-05-07 로직에 유저가 요청반려당했음을 알려주는걸 추가해야할거같음 
     @Transactional
-    fun denyRequest(id:Long,userDetails: UserDetailsImpl):GymCreateDenyResponseDto{
+    fun denyRequest(id: Long, userDetails: UserDetailsImpl): GymCreateDenyResponseDto {
         var res = GymCreateDenyResponseDto()
-        if (userDetails.getUser().userType == User.UserType.ADMIN){
+        if (userDetails.getUser().userType == User.UserType.ADMIN) {
             val request = gymCreateRequestRepository.findById(id)
-            if (Objects.nonNull(request)){
-                gymCreateRequestRepository.delete(request.get())
-                res.code = HttpServletResponse.SC_OK
-                res.msg = "성공적으로 거절하였습니다."
-                res.request = SimpleCreateRequest(request.get())
+            if (Objects.nonNull(request)) {
+                if (request.get().status == GymCreateRequest.Status.AWAIT) {
+                    request.get().updateStatus(GymCreateRequest.Status.DENIED)
+                    res.code = HttpServletResponse.SC_OK
+                    res.msg = "성공적으로 거절하였습니다."
+                    res.request = SimpleCreateRequest(request.get())
+                } else {
+                    res.code = HttpServletResponse.SC_BAD_REQUEST
+                    res.msg = "이미 수락 또는 거절된 요청입니다."
+                }
             } else {
-                res.code=HttpServletResponse.SC_BAD_REQUEST
+                res.code = HttpServletResponse.SC_BAD_REQUEST
                 res.msg = "존재하지않는 요청 ID입니다."
             }
-        } else{
+        } else {
             res.code = HttpServletResponse.SC_BAD_REQUEST
             res.msg = "권한이 부족합니다."
         }
