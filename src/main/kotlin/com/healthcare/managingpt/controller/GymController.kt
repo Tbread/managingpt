@@ -1,6 +1,7 @@
 package com.healthcare.managingpt.controller
 
 import com.healthcare.managingpt.dto.request.GymCreateRequestDto
+import com.healthcare.managingpt.dto.response.GymCreateDenyResponseDto
 import com.healthcare.managingpt.dto.response.GymCreatePermitResponseDto
 import com.healthcare.managingpt.dto.response.GymCreateRequestsViewResponseDto
 import com.healthcare.managingpt.dto.response.GymCreateResponseDto
@@ -32,5 +33,10 @@ class GymController(private var gymService: GymService) {
     @GetMapping("/permit-request/{id}")
     fun permitRequest(@AuthenticationPrincipal userDetails: UserDetailsImpl,@PathVariable id:Long):GymCreatePermitResponseDto{
         return gymService.permitRequest(id,userDetails)
+    }
+
+    @GetMapping("/deny-request/{id}")
+    fun denyRequest(@AuthenticationPrincipal userDetails: UserDetailsImpl,@PathVariable id:Long):GymCreateDenyResponseDto{
+        return gymService.denyRequest(id,userDetails)
     }
 }
