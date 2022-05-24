@@ -20,23 +20,4 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/gym")
 class GymController(private var gymService: GymService) {
 
-    @PostMapping("/create")
-    fun createGym(@RequestBody req:GymCreateRequestDto, @AuthenticationPrincipal userDetails: UserDetailsImpl): GymCreateResponseDto {
-        return gymService.createGym(req,userDetails)
-    }
-
-    @GetMapping("/view-request")
-    fun viewCreateRequests(@AuthenticationPrincipal userDetails: UserDetailsImpl):GymCreateRequestsViewResponseDto{
-        return gymService.viewCreateRequests(userDetails)
-    }
-
-    @GetMapping("/permit-request/{id}")
-    fun permitRequest(@AuthenticationPrincipal userDetails: UserDetailsImpl,@PathVariable id:Long):GymCreatePermitResponseDto{
-        return gymService.permitRequest(id,userDetails)
-    }
-
-    @GetMapping("/deny-request/{id}")
-    fun denyRequest(@AuthenticationPrincipal userDetails: UserDetailsImpl,@PathVariable id:Long):GymCreateDenyResponseDto{
-        return gymService.denyRequest(id,userDetails)
-    }
 }
