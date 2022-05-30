@@ -14,6 +14,7 @@ class User : TimeStamped() {
     enum class UserType {
         DEFAULT,
         MANAGER,
+        OWNER,
         ADMIN
     }
 
@@ -35,6 +36,10 @@ class User : TimeStamped() {
 
     fun passwordReset(password: String) {
         this.password = password
+    }
+
+    fun updateUserType(userType:UserType){
+        this.userType = userType
     }
 
 }

@@ -40,6 +40,8 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	//TODO 엘라스틱서치 추가해보기
+
 }
 
 tasks.withType<KotlinCompile> {
