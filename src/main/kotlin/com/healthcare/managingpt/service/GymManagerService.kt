@@ -42,6 +42,7 @@ class GymManagerService(
                     gymManager.gymId = gym
                     gymManagerRepository.save(gymManager)
                     user.updateUserType(User.UserType.MANAGER)
+                    user.updateBelong(gym!!)
                     res.code = HttpServletResponse.SC_OK
                     res.msg = "성공적으로 매니저로 임명하였습니다."
                     res.username = req.username

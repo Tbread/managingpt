@@ -2,11 +2,7 @@ package com.healthcare.managingpt.model
 
 
 import lombok.NoArgsConstructor
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
 @Entity
 @NoArgsConstructor
@@ -34,12 +30,20 @@ class User : TimeStamped() {
     @Column(nullable = false)
     var userType: UserType = UserType.DEFAULT
 
+    @ManyToOne
+    @JoinColumn
+    var belong:Gym? = null
+
     fun passwordReset(password: String) {
         this.password = password
     }
 
     fun updateUserType(userType:UserType){
         this.userType = userType
+    }
+
+    fun updateBelong(gym:Gym){
+        this.belong = gym
     }
 
 }

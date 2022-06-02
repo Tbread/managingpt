@@ -91,6 +91,7 @@ class GymRequestService(
                     gymRepository.save(gym)
                     gymCreateRequest.get().updateStatus(GymCreateRequest.Status.ACCEPTED)
                     gymCreateRequest.get().applicant!!.updateUserType(User.UserType.OWNER)
+                    gymCreateRequest.get().applicant!!.updateBelong(gym)
                     res.code = HttpServletResponse.SC_OK
                     res.msg = "성공적으로 승인하였습니다."
                     res.request = SimpleCreateRequest(gymCreateRequest!!.get())
