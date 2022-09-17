@@ -52,4 +52,9 @@ class GymManagerService(
         }
         return res
     }
+
+    @Transactional
+    fun applyGymClient(){
+        //user먼저구현
+    }
 }

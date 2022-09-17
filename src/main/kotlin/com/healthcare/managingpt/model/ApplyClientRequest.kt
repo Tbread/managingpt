@@ -20,8 +20,9 @@ class ApplyClientRequest:TimeStamped() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id:Long = 0
 
-    @Column(nullable = false)
-    var username:String = ""
+    @ManyToOne
+    @JoinColumn
+    var applicant:User? = null
 
     @ManyToOne
     @JoinColumn
