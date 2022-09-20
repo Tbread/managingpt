@@ -28,7 +28,7 @@ class GymRequestService(
     fun createGym(req: GymCreateRequestDto, userDetails: UserDetailsImpl): GymCreateResponseDto {
         var res = GymCreateResponseDto()
         var regNum: String = req.registrationNum
-        if (gymCreateRequestRepository.existsByRegistrationNum(regNum) && gymRepository.existsByRegistrationNum(regNum)) {
+        if (!gymCreateRequestRepository.existsByRegistrationNum(regNum) && !gymRepository.existsByRegistrationNum(regNum)) {
             var user: User = userRepository.findByUsername(userDetails.username)!!
             if (user.userType != User.UserType.ADMIN) {
                 var gymCreateRequest = GymCreateRequest()
