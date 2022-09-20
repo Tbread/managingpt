@@ -31,8 +31,12 @@ class ApplyClientRequest:TimeStamped() {
     @Column(nullable = false)
     var status = ApplyClientRequest.Status.AWAIT
 
+    @Column(nullable = false)
+    var closing = false
+
     fun updateStatus(status:Status){
         this.status = status
+        this.closing = true
     }
 
 }

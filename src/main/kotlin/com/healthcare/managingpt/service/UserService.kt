@@ -119,11 +119,18 @@ class UserService(
                     res.code = HttpServletResponse.SC_BAD_REQUEST
                 } else {
                     val user = userDetails.getUser()
-                    if (applyClientRepository.existsByGymAndApplicant(gym,user)){
+                    if (applyClientRepository.existsByGymAndApplicantAndClosing(gym,user,false)){
                         res.msg = "이미 회원등록 요청한 상태입니다."
                         res.code = HttpServletResponse.SC_BAD_REQUEST
                     } else{
-                        TODO("request작성")
+                        var request = ApplyClientRequest()
+                        request.applicant = userDetails.getUser()
+                        request.gym = gym
+                        request.status = ApplyClientRequest.Status.AWAIT
+                        applyClientRepository.save(request)
+                        res.msg = "성공적으로 요청하였습니다."
+                        res.code = HttpServletResponse.SC_OK
+                        res.gymId = gym.id
                     }
                 }
             }
