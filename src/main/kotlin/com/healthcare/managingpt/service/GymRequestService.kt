@@ -19,38 +19,44 @@ import javax.servlet.http.HttpServletResponse
 
 @Service
 class GymRequestService(
-    private var gymRepository: GymRepository,
-    private var gymCreateRequestRepository: GymCreateRequestRepository,
-    private var userRepository: UserRepository
+        private var gymRepository: GymRepository,
+        private var gymCreateRequestRepository: GymCreateRequestRepository,
+        private var userRepository: UserRepository
 ) {
 
     @Transactional
     fun createGym(req: GymCreateRequestDto, userDetails: UserDetailsImpl): GymCreateResponseDto {
         var res = GymCreateResponseDto()
         var regNum: String = req.registrationNum
-        if (!gymCreateRequestRepository.existsByRegistrationNum(regNum) && !gymRepository.existsByRegistrationNum(regNum)) {
-            var user: User = userRepository.findByUsername(userDetails.username)!!
-            if (user.userType != User.UserType.ADMIN) {
-                var gymCreateRequest = GymCreateRequest()
-                gymCreateRequest.address = req.address
-                gymCreateRequest.applicant = user
-                gymCreateRequest.tel = req.tel
-                gymCreateRequest.name = req.name
-                gymCreateRequest.registrationNum = req.registrationNum
-                gymCreateRequestRepository.save(gymCreateRequest)
-                res.code = HttpServletResponse.SC_OK
-                res.msg = "성공적으로 신청하였습니다."
-                res.regNum = req.registrationNum
+        if (Objects.nonNull(userDetails.getUser().belong)) {
+            res.code = HttpServletResponse.SC_BAD_REQUEST
+            res.msg = "이미 체육관에 소속된 상태입니다."
+        } else {
+            if (!gymCreateRequestRepository.existsByRegistrationNum(regNum) && !gymRepository.existsByRegistrationNum(regNum)) {
+                var user: User = userRepository.findByUsername(userDetails.username)!!
+                if (user.userType != User.UserType.ADMIN) {
+                    var gymCreateRequest = GymCreateRequest()
+                    gymCreateRequest.address = req.address
+                    gymCreateRequest.applicant = user
+                    gymCreateRequest.tel = req.tel
+                    gymCreateRequest.name = req.name
+                    gymCreateRequest.registrationNum = req.registrationNum
+                    gymCreateRequestRepository.save(gymCreateRequest)
+                    res.code = HttpServletResponse.SC_OK
+                    res.msg = "성공적으로 신청하였습니다."
+                    res.regNum = req.registrationNum
+                } else {
+                    res.code = HttpServletResponse.SC_BAD_REQUEST
+                    res.msg = "운영진은 할 수 없습니다."
+                }
+
             } else {
                 res.code = HttpServletResponse.SC_BAD_REQUEST
-                res.msg = "운영진은 할 수 없습니다."
+                res.msg = "이미 등록상태이거나 등록신청한 사업자등록번호 입니다."
+                res.regNum = req.registrationNum
             }
-
-        } else {
-            res.code = HttpServletResponse.SC_BAD_REQUEST
-            res.msg = "이미 등록상태이거나 등록신청한 사업자등록번호 입니다."
-            res.regNum = req.registrationNum
         }
+
         return res
     }
 
@@ -59,7 +65,7 @@ class GymRequestService(
         var res: GymCreateRequestsViewResponseDto = GymCreateRequestsViewResponseDto()
         if (user.userType == User.UserType.ADMIN) {
             var requestList: List<GymCreateRequest> =
-                gymCreateRequestRepository.findByStatus(GymCreateRequest.Status.AWAIT)
+                    gymCreateRequestRepository.findByStatus(GymCreateRequest.Status.AWAIT)
             var simpleCreateRequests = arrayListOf<SimpleCreateRequest>()
             for (request: GymCreateRequest in requestList) {
                 var simpleCreateRequest: SimpleCreateRequest = SimpleCreateRequest(request)
