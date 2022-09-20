@@ -13,7 +13,8 @@ class ApplyClientRequest:TimeStamped() {
     enum class Status{
         AWAIT,
         ACCEPTED,
-        DENIED
+        DENIED,
+        ERROR
     }
 
     @Id
