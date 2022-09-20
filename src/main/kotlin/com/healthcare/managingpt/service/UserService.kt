@@ -40,7 +40,7 @@ class UserService(
         val password: String = req.password
         var res: UserRegisterResponseDto = UserRegisterResponseDto()
         var user: User = User()
-        if (userRepository.existsByUsername(username) && userRepository.existsByEmail(req.email)) {
+        if (!userRepository.existsByUsername(username) && !userRepository.existsByEmail(req.email)) {
             user.username = username
             user.password = passwordEncoder.encode(password)
             user.userType = User.UserType.DEFAULT
