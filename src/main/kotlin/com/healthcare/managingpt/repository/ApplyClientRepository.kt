@@ -10,4 +10,6 @@ interface ApplyClientRepository:JpaRepository<ApplyClientRequest,Long> {
     fun findByGym(gym:Gym):List<ApplyClientRequest>
 
     fun existsByGymAndApplicantAndClosing(gym: Gym,applicant:User,closing:Boolean):Boolean
+
+    fun findByGymAndClosing(gym:Gym,closing: Boolean):List<ApplyClientRequest>
 }

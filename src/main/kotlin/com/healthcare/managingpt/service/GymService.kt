@@ -57,7 +57,7 @@ class GymService(
     }
 
     @Transactional
-    fun denyClient(userDetails: UserDetailsImpl,id:Long):ProcessingClientResponseDto{
+    fun denyClient(userDetails: UserDetailsImpl, id: Long): ProcessingClientResponseDto {
         var res = ProcessingClientResponseDto()
         var applyRequest = applyClientRepository.findById(id).get()
         if (userDetails.getUser().userType != User.UserType.OWNER && userDetails.getUser().userType != User.UserType.MANAGER) {
@@ -72,18 +72,38 @@ class GymService(
                     res.code = HttpServletResponse.SC_BAD_REQUEST
                     res.msg = "접근 권한이 없습니다." // 해당 체육관의 소유자, 또는 매니저가 아님
                 } else {
-                        if (applyRequest.closing) {
-                            res.code = HttpServletResponse.SC_BAD_REQUEST
-                            res.msg = "이미 종료된 신청건입니다."
-                        } else {
-                            applyRequest.updateStatus(ApplyClientRequest.Status.DENIED)
-                            res.code = HttpServletResponse.SC_OK
-                            res.msg = "성공적으로 거절 하였습니다."
-                            res.simpleApplyRequest = SimpleApplyRequest(applyRequest)
-                        }
+                    if (applyRequest.closing) {
+                        res.code = HttpServletResponse.SC_BAD_REQUEST
+                        res.msg = "이미 종료된 신청건입니다."
+                    } else {
+                        applyRequest.updateStatus(ApplyClientRequest.Status.DENIED)
+                        res.code = HttpServletResponse.SC_OK
+                        res.msg = "성공적으로 거절 하였습니다."
+                        res.simpleApplyRequest = SimpleApplyRequest(applyRequest)
                     }
                 }
             }
+        }
+        return res
+    }
+
+    @Transactional
+    fun viewRequests(userDetails: UserDetailsImpl): ViewRequestsResponseDto {
+        var res = ViewRequestsResponseDto()
+        if (userDetails.getUser().userType != User.UserType.OWNER && userDetails.getUser().userType != User.UserType.MANAGER){
+            res.msg = "접근 권한이 없습니다."
+            res.code = HttpServletResponse.SC_BAD_REQUEST
+        } else {
+            var simpleList = arrayListOf<SimpleApplyRequest>()
+            var requestList:List<ApplyClientRequest> = applyClientRepository.findByGymAndClosing(userDetails.getUser().belong!!,false)
+            for(request:ApplyClientRequest in requestList){
+                var simpleApplyRequest = SimpleApplyRequest(request)
+                simpleList.add(simpleApplyRequest)
+            }
+            res.code = HttpServletResponse.SC_OK
+            res.msg = "성공적으로 불러왔습니다."
+            res.requests = simpleList
+        }
         return res
     }
 
